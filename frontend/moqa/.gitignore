@@ -1,0 +1,15 @@
+.rebar3
+_*
+.eunit
+*.o
+*.beam
+*.plt
+*.swp
+*.swo
+erl_crash.dump
+.rebar
+_build
+.idea
+*.iml
+rebar3.crashdump
+*~

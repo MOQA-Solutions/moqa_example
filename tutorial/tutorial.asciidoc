@@ -1,0 +1,366 @@
+[float]
+= Getting Started
+- We take just a small example to show how all that works. +
+- All Nodes in this example are created from *The Same Machine* to simplify things +
+- The Machine's name is ABDELGHANI, it runs FreeBSD 13.0 OS and Erlang/OTP 24 +
+- You can use *any* type of *Clusters* to get in touch with our System, but it's *recommended* to use a *Private Local Network* for more *security* +
+- Please follow this *Tutorial* carrefully until the end. +
+[float]
+== Backend Side 
+- We have used *1 Island* for the *Backend Side* and that means *2 Nodes* : `ghani1@ABDELGHANI` and `ghani2@ABDELGHANI` +
+- They have respectively the repositories `moqabase_node_1` and `moqabase_node_2` +
+- They have respectively their *Primary Partitions* `'1'` and `'2'` and their *Secondary Partitions* `'2'` and `'1'` +
+- We start by running `moqabase` Server on the *First Node* : +
+[.result]
+====
+image::images/init/init1.jpg[]
+====
+- Same thing on the *Second Node* : +
+[.result]
+====
+image::images/init/init2.jpg[]
+====
+[float]
+== Frontend Side 
+- We create a *Frontend Node* `ghani@ABDELGHANI` to run `moqa` Server : +
+[.result]
+====
+image::images/init/init3.jpg[]
+====
+[float]
+== Client Side 
+- Finally we create *2 Clients* on *2 Different Erlang Sessions* +
+[.result]
+====
+image::images/init/init4.jpg[]
+image::images/init/init5.jpg[]
+====
+- We can check on `ghani@ABDELGHANI` Node that the Island's Nodes are both *active* and each from them have *200 Procs* by default : +
+[.result]
+====
+image::images/init/init6.jpg[]
+====
+[float]
+= Signup, Connect & Disconnect 
+- First, consider that *signing up should be by Phone Number* +
+- I have avoided extra operations that *should* be present to *correctly* signing up like *checking* the number's owner by calling this number or messaging +
+- We start by *signing up a new User* for *each* client's session +
+[.result]
+====
+image::images/signup/signup1.jpg[]
+image::images/signup/signup2.jpg[]
+====
+* As you can see, signing up is done with success because our database *does not contain* any of those *Keys*(Phone Numbers) +
+* Now we can check our database for those *updates* +
+** First we should *pick up the Partition* in question for each *Key* +
+** As we have *1 Island*, that means there are *Two Partitions* : `'1'` and `'2'` +
+** So we will get the Partition in question by *hashing* the *Key* but in *binary format* as database's data is *all in binary* +
+* We check updates on the first node : `ghani1@ABDELGHANI` +
+[.result]
+====
+image::images/signup/signup3.jpg[]
+====
+- As we can see, the *New* records for the *New* users are created and all is fine +
+- Now let's check the other node : `ghani2@ABDELGHANI` +
+[.result]
+====
+image::images/signup/signup4.jpg[]
+====
+- Now we can check on the Frontend Node the *Users's States* : +
+[.result]
+====
+image::images/signup/signup5.jpg[]
+====
+- Okey all is fine and the two users are *online*, as we can see that each user have its `pid` representant the *Process Actor Identifier* +
+- Now we will check the *Client's State* and the *Server's State* for each user +
+- The *Client's State* means the state of the *client's process*
+- The *Server's State* means the state of the *user's actor process* on the Frontend Server
+[.result]
+====
+image::images/signup/signup6.jpg[]
+====
+- Okey now let's `disconnect` one user
+[.result]
+====
+image::images/signup/signup7.jpg[]
+====
+- And checking after the *Frontend Server's State* +
+[.result]
+====
+image::images/signup/signup8.jpg[]
+====
+- As we can see there's no more a *Process Actor* for *this user*, instead we have the *Date* of its *Last* connection +
+- Now we try to `connect` again with a *wrong password* and after connecting with the *right* one +
+[.result]
+====
+image::images/signup/signup9.jpg[]
+====
+- Cheking the Frontend Server's State +
+[.result]
+====
+image::images/signup/signup10.jpg[]
+====
+- As we can see, a *New Process Actor* for the *New User's Session* +
+[float]
+= Subscriptions
+- Now we will move to *Subscriptions* between users, it's as simple as *any* subscription based application +
+- Let's *send a Subscription Request* from `+213774000000` to `+213771000000` +
+[.result]
+====
+image::images/subscribe/subscribe1.jpg[]
+====
+- Let's check on `+213771000000` terminal : +
+[.result]
+====
+image::images/subscribe/subscribe2.jpg[]
+====
+- Now let's check *client's state* and *server's state* for `+213774000000` user +
+[.result]
+====
+image::images/subscribe/subscribe3.jpg[]
+====
+- We can see the subscription's request get *out* to `+213771000000` +
+- Same thing for `+213771000000` except the request is getting *in* not *out* +
+[.result]
+====
+image::images/subscribe/subscribe4.jpg[]
+====
+- Okey now let's check our database by reading the two users records on *Any Node* from the Island +
+[.result]
+====
+image::images/subscribe/subscribe5.jpg[]
+====
+- Now we will *cancel* this subscription request *from the sender*, and checking both user *client's* and *server's states*, and checking *database's updates* too +
+[.result]
+====
+image::images/subscribe/subscribe6.jpg[]
+image::images/subscribe/subscribe7.jpg[]
+image::images/subscribe/subscribe8.jpg[]
+====
+- *Cancelling* a subscription request *From The Sender* is the same as *Rejecting it from the Destination* +
+- Okey that's fine, now let's *send again* the same subscription request but this time `+213771000000` will *accept* this request +
+[.result]
+====
+image::images/subscribe/subscribe9.jpg[]
+image::images/subscribe/subscribe10.jpg[]
+====
+- Okey let's check client's and server's states for both users and check the Database's updates +
+[.result]
+====
+image::images/subscribe/subscribe11.jpg[]
+image::images/subscribe/subscribe12.jpg[]
+image::images/subscribe/subscribe13.jpg[]
+====
+- Yeah, we can see that `+213774000000` and `+213771000000` *become Friends* and each one *belongs to the other's Roster* +
+- We can see also that each user is *online* in the other user's state +
+- Now let's `halt()` user `+213771000000` for *abnormal disconnection* and see what will happens with user `+213774000000` +
+[.result]
+====
+image::images/subscribe/subscribe14.jpg[]
+image::images/subscribe/subscribe15.jpg[]
+image::images/subscribe/subscribe16.jpg[]
+====
+- We can see in both client's state and server's state for user `+213774000000` that `+213771000000` is *no more* here and we have its *Last Seen Date* +
+- We can see that in *Frontend Server's State* too +
+- This is a *Well Known Benefit* from *Subscribing* to someone, you will be *Notified* by its *Presence* or *Absence* as in `xmpp` or similar protocols +
+- Now let's simply `unsubscribe` user `+213771000000` from `+213774000000` +
+[.result]
+====
+image::images/subscribe/subscribe17.jpg[]
+image::images/subscribe/subscribe18.jpg[]
+====
+- As we can see, they are *no more Friends* now +
+[float]
+= Publications
+- Now as our users are no more friends, let's try to `publish` something from one to the other +
+[.result]
+====
+image::images/publish/publish1.jpg[]
+image::images/publish/publish2.jpg[]
+====
+- `+213774000000` *has sent* a message to `+213771000000` +
+- `+213774000000` *has been notified* that the message *is broked to the server* +
+- *This is similar to FACEBOOK MESSENGER Empty Circle* +
+- `+213771000000` *has received* the message *from* `+213774000000` +
+- Now let's do the same thing but from `+213771000000` to `+213774000000`
+[.result]
+====
+image::images/publish/publish3.jpg[]
+image::images/publish/publish4.jpg[]
+====
+- `+213771000000` *has sent* a message to `+213774000000` +
+- `+213771000000` *has been notified* that the message *is broked to the server* +
+- `+213774000000` has received the message from `+213771000000` +
+- Now let's try some *Offline Features*, first let's `halt` user `+213771000000` +
+[.result]
+====
+image::images/publish/publish5.jpg[]
+image::images/publish/publish6.jpg[]
+====
+- We have checked in the Frontend Server just to show that each *abnormal* `disconnect` results in *Process Actor Crash* and that's *Normal* +
+- Now in the terminal of user `+213774000000`, we will try to `publish` some messages to `+213771000000` and also to `subscribe` that user +
+[.result]
+====
+image::images/publish/publish7.jpg[]
+====
+- Now we will check our *database* by *reading* `+213771000000` record in *any* of the Backend Nodes +
+[.result]
+====
+image::images/publish/publish8.jpg[]
+====
+- Yeah, we have all *Sent Packets Stored* Safely in our *Database* +
+- That's the meaning of a *Broker*, he will *Never Release or get Lost Anything when he Declared that he Received that Item* +
+- Okey now let's `connect` again user `+213771000000` and see what will happen +
+[.result]
+====
+image::images/publish/publish9.jpg[]
+====
+- And as expected, packets are delivered immediately to their *Destination* after *Connection* +
+- Now let's check again database's *updates* +
+[.result]
+====
+image::images/publish/publish10.jpg[]
+====
+- Now Packets are *Released after Sending them to their Destinations* +
+[.result]
+====
+image::images/publish/publish11.jpg[]
+====
+- Now in user `+213771000000`, let's `accept` user `+213774000000` subscription and exchange some messages between them +
+[.result]
+====
+image::images/publish/publish12.jpg[]
+image::images/publish/publish13.jpg[]
+image::images/publish/publish14.jpg[]
+====
+- We have a *New* thing here, as `+213774000000` and `+213771000000` *become Friends*, each one will be *Notified* if a *Sent Message has Reached its Destination* +
+- *This is similar to FACEBOOK MESSENGER Filled Circle* +
+- This is too a *Well Known Benefit* of *Subscribing* to someone +
+[float]
+= Block
+- Now in user `+213771000000` let's `block` user `+213774000000` and check both client's state and server's state +
+[.result]
+====
+image::images/block/block1.jpg[]
+image::images/block/block2.jpg[]
+====
+- As we can see they are *no more Friends* and each one is not *Subscribed* to the other +
+- Let's check Database's *updates* for user `+213771000000` on one of the Backend's Nodes +
+[.result]
+====
+image::images/block/block3.jpg[]
+====
+- As we can see here, `+213774000000` *became a Member of the Black List* of `+213771000000` +
+- That means `+213771000000` *will not receive Anything Anymore* from `+213774000000` +
+- Let's try this by sending a message +
+[.result]
+====
+image::images/block/block4.jpg[]
+image::images/block/block5.jpg[]
+====
+- As expected, nothing there was *Received* by `+213771000000` +
+- We can `unblock` a user easily and he will *no more a Member of the Unblocker's Black List* +
+[.result]
+====
+image::images/block/block6.jpg[]
+====
+[float]
+= Crash
+- Now we have to check a *Very Important Feature* of our System  : *Sudden Crash* of one of the Island's Nodes +
+- Here *we must* show our *Fault-Tolerance* and how to deal with *Node's Down* efficiently +
+- Now let's `subscribe` our users each to other, then `halt()` the second node : `ghani2@ABDELGHANI`, then `unsubscribe` user `+213771000000` from user `+213774000000` and see what will happen +
+[.result]
+====
+image::images/crash/crash1.jpg[]
+image::images/crash/crash2.jpg[]
+====
+- Here we can see that `+213774000000` has *Crashed* with *Reason* `server offline` +
+- Since `unsubscribe` someone results in *updating* both *Source* and *Destination* Databases's Records, the *Crash* of user `+213774000000` was expected +
+- Lets's check the Frontend Server's state after that +
+[.result]
+====
+image::images/crash/crash3.jpg[]
+====
+- As expected the *Primary Node* for Partition `'2'` is `undefined` now +
+- Okey let's take a look to `+213774000000` at our Database in the *Only* Available Backend Node at this moment : `ghani1@ABDELGHANI` +
+[.result]
+====
+image::images/crash/crash4.jpg[]
+====
+- We have the `unsubscribe` *Packet* entirely *Saved* in our Database and that was expected because the `unsubscribe` *Operation has not Terminated Yet* +
+- If we have an *Unterminated Operation* in user's Record, this last *can't never Connect before Terminating with success this Operation* +
+- We can garantee by this *Efficient Design*, the *Integrity of Data* 
+- As our example show, an *Operation* can be `halted` at *Any* position and that may results in doing *some* Database's updates and *Crashing Before Doing the Rest*, so we have *Fixed* that by this way +
+- Okey now let's try to `connect` again user `+213774000000` and see what will happens +
+[.result]
+====
+image::images/crash/crash5.jpg[]
+====
+- The client is connected successfully but after that he has *Crashed Again* +
+- This is *Normal*, it can even *crash many times* before *Finishing* the *Unterminated Operation* and that *depends* of *the Number of Records* that should be *updated* +
+- The most *worst* situation is `deactivate` an user because that require to *update all* users which *belongs* to its *Roster* +
+- In the case of *Normal Busy Server*, the Client can crash just *once* or not crashing at ever +
+- Let's take a look again to our Database +
+[.result]
+====
+image::images/crash/crash6.jpg[]
+====
+- As expected, the *Unterminated Operation* still there +
+- Let's doing another try to `connect` and see what will happen +
+[.result]
+====
+image::images/crash/crash7.jpg[]
+====
+- Now the client is connected successfully and he *did not Crash After* +
+- Another look to the Database +
+[.result]
+====
+image::images/crash/crash8.jpg[]
+====
+- Exactly As expected, the *Unterminated Operation* has *released* and that means it has been *Done* successfully +
+- Once the `halted` *Node* Wake Up, he will be *updated* by *All Missed Done Updates* by his *Peer Node* +
+[float]
+= Scalability
+- Okey as we have *Proved* our Power in *Fault-Tolerance*, we should doing the same thing with *Scalablility* +
+- *Frontend Scalability is not available yet, all what we have is One Server, but that will be our next step if you have liked the work* +
+- What we talk about here is *Backend Scalability*, we *scale* it by *adding* more *Table's Fragments* and more *Worker Procs* +
+- Each Table's Fragment corresponding to a *Predefined Number of Procs* that should set in `environment variables` before starting the `moqabase` application +
+- By default, this number is `100`, that means if we *scale* a Table to `20` *Fragments*, we will have `2000` corresponding *Procs* +
+- Okey let's just try this +
+[.result]
+====
+image::images/scale/scale1.jpg[]
+====
+* To `scale` a given Partition, there are some *Requirements* and `scale` will *Fail* if we don't *Respect* that +
+** Scale *can't be Done* if the *Peer Node* is *Offline* because that will result in *Unbalance* between the Island's Nodes +
+** Scale *can't be Done* if the *Frontend Node* is *Online* because we will *loss* the *1 Process/1 Record* Protection Mechanism +
+* Okey let's check *Scale Requirements* and try again +
+[.result]
+====
+image::images/scale/scale2.jpg[]
+====
+- Very good, *Scale* is done successfully and we can check the total number of *Worker Procs* and as expected : `2100` procs, `2000` for Partition `'1'` and `100` for Partition `'2'` + 
+- Let's check that on the *Second Node* 
+[.result]
+====
+image::images/scale/scale3.jpg[]
+====
+- And as we can see Scale is *Propagated* to the *Peer Node* and all is fine +
+[float]
+= Logging
+- We have 2 `logging` files for both Frontend Node and Backend Nodes +
+* The First is `info_logging.log` and it will handle *All and Just* `info` logs +
+* Second is `debug_logging.log` and it will handle *All and Just* `debug` logs +
+** `debug` logs are *triggered* from the code and you can *edit* that as your needs +
+- Let's take a look on some logs after *terminating* our System +
+[.result]
+====
+image::images/log/log1.jpg[]
+image::images/log/log2.jpg[]
+image::images/log/log3.jpg[]
+image::images/log/log4.jpg[]
+====
+Okey that was all what we have for the moment, if you have any trouble dealing with our System, don't hesistate to contact us by mail : `hachemaouisidimohammed@gmail.com`.
+
+
+
