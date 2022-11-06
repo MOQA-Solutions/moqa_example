@@ -19,12 +19,12 @@ This is a Full Example to test `moqalib` Library, `moqabase` Server, `moqa` Serv
       - Type `rebar3 shell`.<br>
 This is a simple configuration with just 2 clients, you can use any number of clients that you want.<br>
 3. Follow [this tutorial](https://github.com/MOQA-Solutions/moqa_example/blob/master/tutorial/tutorial.asciidoc) and enjoy.<br>
-4. You can report any Bugs that may you have when using our System since it is New and surely
+4. You can report any Bugs that you may have when using our System since it is New and surely
 it has a lot of bugs and troubles.<br>
 **NOTE**<br>
-If you did some mistakes like `subresp` a **NON** Subscriber or for example `block` yourself
-then as **I said before**, if you did not respect **Graphical Rules** that I have mentionned at the head of
-`molqa_worker.erl` file, then you may *Destroy* all your data and you need to stop the whole system, delete
-the Entire Database from both Backend Nodes by `rm -r Mnesia*` and Restart everything from New.<br>
+If you did some mistakes like `subresp` an User which had not sent a Subscription Request or for example 
+`block` yourself then as **I said before**, if you did not respect **Graphical Rules** that I have mentionned
+at the head of `molqa_worker.erl` file, then you may *Destroy* all your data and you need to stop the whole system,
+delete the Entire Database from both Backend Nodes by `rm -r Mnesia*` and Restart everything from New.<br>
  
 
